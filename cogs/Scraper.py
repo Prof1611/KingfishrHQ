@@ -86,39 +86,45 @@ class Scrape(commands.Cog):
             await interaction.followup.send(embed=error_embed)
 
     def run_scraper(self):
-        logging.info("Running scraper using Seated API...")
-        audit_log("Starting scraper: Requesting event data from Seated API.")
+        logging.info("Running scraper using Bandsintown API...")
+        audit_log(
+            "Starting scraper: Requesting event data from Bandsintown API for Kingfishr."
+        )
         new_entries = []
         try:
-            # API endpoint that returns event data (powered by Seated)
-            url = "https://cdn.seated.com/api/tour/deb5e9f0-4af5-413c-a24b-1b22f11513b2?include=tour-events"
+            # API endpoint that returns event data for Kingfishr
+            url = (
+                "https://rest.bandsintown.com/V3.1/artists/Kingfishr/events/"
+                "?app_id=js_www.kingfishr.ie"
+            )
             response = requests.get(url)
             response.raise_for_status()  # Raise an exception for bad responses
-            data = response.json()
-            logging.debug(f"Full API response: {data}")  # Debug: log entire response
-
-            # Extract events from the "included" array where type is "tour-events"
-            included = data.get("included", [])
-            events = [event for event in included if event.get("type") == "tour-events"]
+            events = response.json()
             logging.info(f"Retrieved {len(events)} events from API.")
             audit_log(f"Scraped API: Retrieved {len(events)} events.")
 
             for event in events:
-                attributes = event.get("attributes", {})
-                start_date = attributes.get("starts-at-date-local", "")
-                end_date = attributes.get("ends-at-date-local", "")
-                if start_date:
-                    formatted_start = self.format_api_date(start_date)
-                else:
-                    formatted_start = ""
-                if end_date and end_date.lower() != "none" and end_date != start_date:
-                    formatted_end = self.format_api_date(end_date)
-                    formatted_date = f"{formatted_start} - {formatted_end}"
-                else:
-                    formatted_date = formatted_start
+                start_date_str = (event.get("starts_at") or "").split("T")[0]
+                end_date_str = (event.get("ends_at") or "").split("T")[0]
 
-                venue = attributes.get("venue-name", "")
-                location = attributes.get("formatted-address", "")
+                formatted_start = (
+                    self.format_api_date(start_date_str) if start_date_str else ""
+                )
+                formatted_date = formatted_start
+                if (
+                    end_date_str
+                    and end_date_str.lower() != "none"
+                    and end_date_str != start_date_str
+                ):
+                    formatted_end = self.format_api_date(end_date_str)
+                    formatted_date = f"{formatted_start} - {formatted_end}"
+
+                venue_info = event.get("venue", {})
+                venue = venue_info.get("name", "")
+                location = venue_info.get("location") or ", ".join(
+                    filter(None, [venue_info.get("city"), venue_info.get("country")])
+                )
+
                 entry = (formatted_date, venue, location)
                 new_entries.append(entry)
                 logging.debug(
@@ -232,9 +238,7 @@ class Scrape(commands.Cog):
                 )
             if not exists:
                 try:
-                    content = (
-                        f"The Last Dinner Party at {venue.title()}, {location.title()}"
-                    )
+                    content = f"Kingfishr at {venue.title()}, {location.title()}"
                     logging.info(f"Creating thread for: {thread_title}")
                     await gigchats_channel.create_thread(
                         name=thread_title,
@@ -381,7 +385,7 @@ class Scrape(commands.Cog):
                 try:
                     await guild.create_scheduled_event(
                         name=event_name,
-                        description=f"The Last Dinner Party at {venue.title() if venue else ''}, {location.title() if location else ''}",
+                        description=f"Kingfishr at {venue.title() if venue else ''}, {location.title() if location else ''}",
                         start_time=start_time,
                         end_time=end_time,
                         location=f"{venue.title() if venue else ''}, {location.title() if location else ''}",
