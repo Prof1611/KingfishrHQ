@@ -1,9 +1,6 @@
 # =============================================================
 # KingfishrHQ Configuration
 # -------------------------------------------------------------
-# • Replace each placeholder with the ID from the official Kingfishr server.
-# • All IDs must be integers (no quotes). Enable "Developer Mode" in Discord
-#   to copy IDs from channels, roles, or users.
 # • Comments describe how the bot uses each value inside KingfishrHQ.
 # =============================================================
 
@@ -20,23 +17,23 @@ bot:
 
   # Channel that receives forwarded direct messages sent to KingfishrHQ.
   # Set to null to disable DM forwarding entirely.
-  dm_forward_channel_id: PLACEHOLDER
+  dm_forward_channel_id: 1440018549602123970
 
 channels:
   # Forum channel where new live show threads are created by the scraper.
-  liveshows_forum_id: PLACEHOLDER
+  liveshows_forum_id: 1440020227730702336
 
   # Text channel used for welcome embeds when a member joins.
-  welcome_channel_id: PLACEHOLDER
+  welcome_channel_id: 1440015519435718756
 
   # Channel that is linked in the welcome message to guide new members.
-  new_member_guide_channel_id: PLACEHOLDER
+  new_member_guide_channel_id: 1440015533238911118
 
   # Channel in which the bot reacts to introduction posts. Set to null to disable.
-  introductions_channel_id: PLACEHOLDER
+  introductions_channel_id: 1440015546438385714
 
   # Moderation log channel that receives ban/kick/timeout summaries.
-  moderation_logs_channel_id: PLACEHOLDER
+  moderation_logs_channel_id: 1440018549602123970
 
 features:
   welcome_messages:
@@ -46,7 +43,7 @@ features:
   autorole:
     # Automatically assign this role to new members.
     enabled: true
-    role_id: PLACEHOLDER
+    role_id: 1440017196251086874
     # Give the role to bot accounts as well. Usually leave this false.
     include_bots: false
 
@@ -62,13 +59,9 @@ features:
     # Recreate the channel if it is deleted while the bot is running.
     auto_repair: true
 
-  live_events:
-    # Public website that lists upcoming shows for the scraper command.
-    page_url: "https://www.example.com/"
-
   giveaways:
     # Roles allowed to manage giveaways. Leave empty to allow Manage Server.
-    manager_role_ids: []
+    manager_role_ids: [1440017158884298904]
     # Optional role to ping when a giveaway starts. Set to null to disable.
     ping_role_id: null
     defaults:
