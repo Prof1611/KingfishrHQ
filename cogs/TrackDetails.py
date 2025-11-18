@@ -2,7 +2,7 @@ import discord
 import logging
 import asyncio
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import aiohttp
 from discord import app_commands
