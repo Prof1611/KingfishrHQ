@@ -1,6 +1,6 @@
-# Template Bot
+# KingfishrHQ Discord Bot
 
-A generic Discord bot template featuring welcome messaging, event scraping, configurable presence rotation, and moderation utilities. Follow the checklist below to configure the bot for your server.
+KingfishrHQ keeps the official Kingfishr Discord server running smoothly with welcome posts, live show updates, giveaways, and music-friendly utilities like Songlink lookups. Use this repository to configure and run the bot for the band’s community.
 
 ## Getting started
 
@@ -8,36 +8,35 @@ A generic Discord bot template featuring welcome messaging, event scraping, conf
    ```bash
    pip install -r requirements.txt
    ```
-2. **Create your Discord application**
-   - Visit the [Discord Developer Portal](https://discord.com/developers/applications), create an application, and add a bot user.
-   - Enable the privileged intents you plan to use (at minimum Server Members for welcome and autorole functionality).
-   - Copy the bot token and add it to your environment or hosting platform.
-3. **Grant the bot access to your server**
-   - Use the OAuth2 URL generator to create an invite link with the required scopes (`bot` and `applications.commands`).
-   - Select the permissions you need (Manage Roles, Manage Events, Moderate Members, etc.), invite the bot, and ensure its role is above any roles it must manage.
+2. **Create the Discord application**
+   - Set up a bot user in the [Discord Developer Portal](https://discord.com/developers/applications) and enable the privileged intents you need (at minimum Server Members for welcomes and autorole).
+   - Add the bot token to your environment or hosting platform as `TOKEN`.
+3. **Invite the bot to the Kingfishr server**
+   - Use the OAuth2 URL generator to create an invite link with `bot` and `applications.commands` scopes.
+   - Choose the permissions your staff team requires (Manage Roles, Manage Events, Moderate Members, etc.) and place the bot role above any roles it should assign.
 
 ## Configure `config.yaml`
 
-Each section of `config.yaml` documents the values you need to supply:
+Fill in the server IDs and options for the Kingfishr community:
 
-- **`bot.statuses`** – Rotating presence text shown in the client. Replace the example phrases with ones relevant to your community.
-- **`bot.dm_forward_channel_id`** – Channel ID that receives DMs sent to the bot. Set to `null` to disable forwarding.
-- **`channels`** – IDs for welcome, moderation log, and optional introduction channels. All IDs are integers obtained with Discord's developer mode.
-- **`features`** – Toggle individual modules and fill in feature specific options:
+- **`bot.statuses`** – Rotating presence lines themed around Kingfishr releases, shows, and announcements.
+- **`bot.dm_forward_channel_id`** – Channel ID that should receive DMs sent to the bot (set to `null` to disable).
+- **`channels`** – IDs for welcome, moderation log, live show forum, and optional introductions channels.
+- **`features`** – Toggle modules and provide their options:
   - `welcome_messages` – Enable/disable welcome embeds.
-  - `autorole` – Role ID to assign on join and whether to include bots.
-  - `member_stats` – Naming format for the member count voice channel.
-  - `live_events.page_url` – Source URL for the live event scraper.
+  - `autorole` – Role ID to grant on join and whether to include bots.
+  - `member_stats` – Category and naming format for the member count voice channel.
+  - `live_events.page_url` – Source URL for the live show scraper.
   - `giveaways` – Defaults, labels, and manager role IDs for the giveaway cog.
   - `songlink` – API configuration for the `/track` command.
-- **`appearance.colours`** – Hex strings that control the success, information, and error embed colours used across every cog.
+- **`appearance.colours`** – Hex colours used across the embeds.
 
 After updating the configuration, restart the bot to reload the settings.
 
-## Running the bot locally
+## Run the bot locally
 
 ```bash
 python main.py
 ```
 
-The bot will load all cogs defined in the `cogs` directory. Review the console output for any configuration warnings.
+The bot loads every cog in `cogs/` and logs configuration warnings in the console for anything missing.
