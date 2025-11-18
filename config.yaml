@@ -1,30 +1,24 @@
 # =============================================================
-# TemplateBot Configuration
+# KingfishrHQ Configuration
 # -------------------------------------------------------------
-# • Replace every PLACEHOLDER with the ID from your Discord server.
-# • All IDs must be integers (no quotes). You can copy them by enabling
-#   "Developer Mode" in Discord and right-clicking the channel, role, or user.
-# • Comments explain how each setting is used and when you might update it.
+# • Replace each placeholder with the ID from the official Kingfishr server.
+# • All IDs must be integers (no quotes). Enable "Developer Mode" in Discord
+#   to copy IDs from channels, roles, or users.
+# • Comments describe how the bot uses each value inside KingfishrHQ.
 # =============================================================
 
 bot:
-  # Messages the bot rotates through for its "listening" presence.
-  # Update the list to suit your community. Leave at least one entry.
+  # Listening presence lines that promote Kingfishr music and news.
+  # Leave at least one entry.
   statuses:
-    - "Planning community events 📅"
-    - "Listening to your feedback 👂"
-    - "Welcoming new members 🎉"
-    - "Keeping the chat friendly 🤝"
-    - "Reviewing the next announcement 📰"
-    - "Answering questions ❓"
-    - "Celebrating milestones 🥳"
-    - "Sharing helpful tips 💡"
-    - "Checking upcoming events 📆"
-    - "Hanging out with the community 💬"
-    - "Highlighting member projects 🌟"
-    - "Moderating conversations 🛡️"
+    - "Spinning Kingfishr on repeat 🎧"
+    - "Watching for the next tour date 📅"
+    - "Listening for your favourite track 🎶"
+    - "Sharing Kingfishr news first 📰"
+    - "Guarding the Kingfishr flock 🛡️"
+    - "Counting down to doors open 🚪"
 
-  # Channel that receives forwarded direct messages sent to the bot.
+  # Channel that receives forwarded direct messages sent to KingfishrHQ.
   # Set to null to disable DM forwarding entirely.
   dm_forward_channel_id: PLACEHOLDER
 

@@ -82,10 +82,10 @@ class CommunityWelcome(commands.Cog):
             else "the getting-started channel"
         )
         embed = discord.Embed(
-            title="Welcome to the community!",
+            title="Welcome to Kingfishr HQ!",
             description=(
-                f"Hey {member.mention}, we're glad you're here! 🌟\n"
-                f"Take a look at {guide_channel} to get started."
+                f"Hey {member.mention}, the flock's happy to have you! 🏹\n"
+                f"Jump into {guide_channel} for tour info, music links, and server guidelines."
             ),
             color=self.info_colour,
         )
