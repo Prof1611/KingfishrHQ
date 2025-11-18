@@ -1,6 +1,6 @@
-# KingfishrHQ Discord Bot
+# Kingfishr HQ Discord Bot
 
-KingfishrHQ keeps the official Kingfishr Discord server running smoothly with welcome posts, live show updates, giveaways, and music-friendly utilities like Songlink lookups. Use this repository to configure and run the bot for the band’s community.
+Kingfishr HQ keeps the official Kingfishr Discord server running smoothly with welcome posts, live show updates, giveaways, and music-friendly utilities like Songlink lookups. Use this repository to configure and run the bot for the band’s community.
 
 ## Getting started
 
