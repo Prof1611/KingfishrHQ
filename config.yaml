@@ -1,0 +1,120 @@
+# =============================================================
+# TemplateBot Configuration
+# -------------------------------------------------------------
+# • Replace every PLACEHOLDER with the ID from your Discord server.
+# • All IDs must be integers (no quotes). You can copy them by enabling
+#   "Developer Mode" in Discord and right-clicking the channel, role, or user.
+# • Comments explain how each setting is used and when you might update it.
+# =============================================================
+
+bot:
+  # Messages the bot rotates through for its "listening" presence.
+  # Update the list to suit your community. Leave at least one entry.
+  statuses:
+    - "Planning community events 📅"
+    - "Listening to your feedback 👂"
+    - "Welcoming new members 🎉"
+    - "Keeping the chat friendly 🤝"
+    - "Reviewing the next announcement 📰"
+    - "Answering questions ❓"
+    - "Celebrating milestones 🥳"
+    - "Sharing helpful tips 💡"
+    - "Checking upcoming events 📆"
+    - "Hanging out with the community 💬"
+    - "Highlighting member projects 🌟"
+    - "Moderating conversations 🛡️"
+
+  # Channel that receives forwarded direct messages sent to the bot.
+  # Set to null to disable DM forwarding entirely.
+  dm_forward_channel_id: PLACEHOLDER
+
+channels:
+  # Forum channel where new live show threads are created by the scraper.
+  liveshows_forum_id: PLACEHOLDER
+
+  # Text channel used for welcome embeds when a member joins.
+  welcome_channel_id: PLACEHOLDER
+
+  # Channel that is linked in the welcome message to guide new members.
+  new_member_guide_channel_id: PLACEHOLDER
+
+  # Channel in which the bot reacts to introduction posts. Set to null to disable.
+  introductions_channel_id: PLACEHOLDER
+
+  # Moderation log channel that receives ban/kick/timeout summaries.
+  moderation_logs_channel_id: PLACEHOLDER
+
+features:
+  welcome_messages:
+    # Toggle welcome messages. Set to false to disable joining announcements.
+    enabled: true
+
+  autorole:
+    # Automatically assign this role to new members.
+    enabled: true
+    role_id: PLACEHOLDER
+    # Give the role to bot accounts as well. Usually leave this false.
+    include_bots: false
+
+  member_stats:
+    # Category to create/use for the member count channel.
+    stats_category_name: "server stats 📊"
+    # Format for the voice channel name. Must include {count}.
+    name_format: "Members: {count}"
+    # Discovery-safe fallback name in case the main name is rejected.
+    fallback_name_format: "members-{count}"
+    # Count bot accounts in the total. Set to true to include them.
+    include_bots: false
+    # Recreate the channel if it is deleted while the bot is running.
+    auto_repair: true
+
+  live_events:
+    # Public website that lists upcoming shows for the scraper command.
+    page_url: "https://www.example.com/"
+
+  giveaways:
+    # Roles allowed to manage giveaways. Leave empty to allow Manage Server.
+    manager_role_ids: []
+    # Optional role to ping when a giveaway starts. Set to null to disable.
+    ping_role_id: null
+    defaults:
+      # Default number of winners when starting a giveaway.
+      winner_count: 1
+      # Default duration (supports values like "30m", "2h", "1d").
+      duration: "1h"
+      # Maximum entries per user by default.
+      max_entries_per_user: 1
+    labels:
+      # Button labels shown on the giveaway message.
+      enter_button_label: "Enter"
+      leave_button_label: "Leave"
+
+  songlink:
+    # API endpoint used to fetch track details. Normally leave as default.
+    base_url: "https://api.song.link/v1-alpha.1/links"
+    # How long to wait for the Songlink API before timing out (seconds).
+    timeout_seconds: 12
+    # Preferred order when listing streaming services on the track embed.
+    platform_order:
+      - spotify
+      - appleMusic
+      - youtube
+      - youtubeMusic
+      - itunes
+      - amazonMusic
+      - amazonStore
+      - deezer
+      - tidal
+      - soundcloud
+      - boomplay
+      - gaana
+      - saavn
+
+appearance:
+  colours:
+    # Embed colour used for success messages.
+    success: "#0ca115"
+    # Embed colour used for informative messages.
+    info: "#5865F2"
+    # Embed colour used for error messages.
+    error: "#ED4245"
