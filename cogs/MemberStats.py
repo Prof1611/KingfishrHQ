@@ -40,7 +40,7 @@ class MemberStats(commands.Cog):
 
         # Settings pulled from config.yaml with sensible defaults
         self.stats_category_name: str = member_stats_cfg.get(
-            "stats_category_name", "📊 Server Stats"
+            "stats_category_name", "Server Stats"
         )
         self.name_template: str = member_stats_cfg.get(
             "name_format", "Members: {count}"
