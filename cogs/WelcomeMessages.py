@@ -84,8 +84,8 @@ class CommunityWelcome(commands.Cog):
         embed = discord.Embed(
             title="Welcome to the Official Home of Kingfishr.",
             description=(
-                f"Hey {member.mention}, we’re so happy you’re here!\n"
-                f"Jump into {guide_channel} for and server information."
+                f"Welcome {member.mention}, we’re so happy you’re here!\n"
+                f"Make sure to check out the {guide_channel} to find your way around!"
             ),
             color=self.info_colour,
         )

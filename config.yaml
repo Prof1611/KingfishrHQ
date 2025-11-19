@@ -122,6 +122,6 @@ appearance:
     # Embed colour used for success messages.
     success: "#0ca115"
     # Embed colour used for informative messages.
-    info: "#5865F2"
+    info: "#D1C52E"
     # Embed colour used for error messages.
     error: "#ED4245"
