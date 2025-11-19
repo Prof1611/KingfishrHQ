@@ -202,7 +202,24 @@ class Scrape(commands.Cog):
 
     async def check_forum_threads(self, guild, interaction, new_entries):
         audit_log("Starting check for forum threads for new entries.")
-        gigchats_id = self.config["gigchats_id"]
+        gigchats_id = self.config.get("channels", {}).get("liveshows_forum_id")
+        if gigchats_id is None:
+            logging.error("Missing 'channels.liveshows_forum_id' in config.yaml.")
+            error_embed = discord.Embed(
+                title="Error",
+                description=(
+                    "Threads channel ID is not configured. "
+                    "Please set `channels.liveshows_forum_id` in config.yaml."
+                ),
+                color=discord.Color.red(),
+            )
+            await interaction.followup.send(embed=error_embed)
+            audit_log(
+                f"{interaction.user.name} (ID: {interaction.user.id}): "
+                "Failed to update threads because 'channels.liveshows_forum_id' "
+                "is missing from config.yaml."
+            )
+            return 0
         gigchats_channel = guild.get_channel(gigchats_id)
         if gigchats_channel is None:
             logging.error(f"Channel with ID {gigchats_id} not found.")
