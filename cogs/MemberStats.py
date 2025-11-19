@@ -586,6 +586,13 @@ class MemberStats(commands.Cog):
             audit_log(
                 f"Renamed member count channel to '{desired}' in guild '{channel.guild.name}' ({channel.guild.id})."
             )
+        except discord.Forbidden:
+            logging.error(
+                f"Forbidden renaming channel #{channel.name} in '{channel.guild.name}'."
+            )
+            audit_log(
+                f"Forbidden renaming member count channel in guild '{channel.guild.name}' ({channel.guild.id})."
+            )
         except discord.HTTPException as e:
             # 50035 Invalid Form Body with Discovery filter complaint
             text = str(e)
@@ -615,13 +622,6 @@ class MemberStats(commands.Cog):
                         )
                 # If already blocked or retry failed, re-raise original
             raise
-        except discord.Forbidden:
-            logging.error(
-                f"Forbidden renaming channel #{channel.name} in '{channel.guild.name}'."
-            )
-            audit_log(
-                f"Forbidden renaming member count channel in guild '{channel.guild.name}' ({channel.guild.id})."
-            )
 
     async def _update_member_count_channel(
         self, guild: discord.Guild, reason: str
