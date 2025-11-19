@@ -137,7 +137,7 @@ class CommunityWelcome(commands.Cog):
             return
 
         # React when message contains the required phrase
-        if "🏹Name:" in message.content:
+        if "💚 Name:" in message.content:
             try:
                 await message.add_reaction("👋")
                 logging.info(
