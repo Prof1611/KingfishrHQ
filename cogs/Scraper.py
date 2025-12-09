@@ -237,9 +237,9 @@ class Scrape(commands.Cog):
         new_threads_created = 0
         for entry in new_entries:
             event_date, venue, location = entry
-            thread_title = event_date.title()
+            thread_title = f"{event_date.title()} - {venue.title()}" if venue else event_date.title()
             norm_title = normalize_string(thread_title)
-            norm_location = normalize_string(location)
+            norm_location = normalize_string(location or "")
             logging.debug(
                 f"Checking thread: original title='{thread_title}', normalized='{norm_title}', location normalized='{norm_location}'"
             )
@@ -300,7 +300,7 @@ class Scrape(commands.Cog):
     async def thread_exists(self, channel, thread_title, location):
         """Check if a thread exists with the given title and if its starter message contains the location."""
         norm_title = normalize_string(thread_title)
-        norm_location = normalize_string(location)
+        norm_location = normalize_string(location or "")
         logging.debug(
             f"Checking existence for thread with normalized title '{norm_title}' and location '{norm_location}'"
         )
