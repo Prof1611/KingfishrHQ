@@ -354,31 +354,6 @@ class Scrape(commands.Cog):
             )
             return False
 
-        # Fallback: check scheduled events for matching thread title
-        try:
-            scheduled_events = await channel.guild.fetch_scheduled_events()
-            logging.debug(
-                f"Fetched {len(scheduled_events)} scheduled events for guild '{channel.guild.name}'."
-            )
-            for event in scheduled_events:
-                normalized_event_name = normalize_string(event.name)
-                logging.debug(
-                    f"Comparing with scheduled event: original name='{event.name}', normalized='{normalized_event_name}'"
-                )
-                # Use startswith to allow for extra details in scheduled event names
-                if normalized_event_name.startswith(norm_title):
-                    logging.debug(
-                        f"Match found in scheduled events: '{normalized_event_name}' starts with '{norm_title}'"
-                    )
-                    audit_log(
-                        f"Scheduled event '{event.name}' exists with similar title to '{thread_title}'."
-                    )
-                    return True
-        except Exception as e:
-            logging.error(f"Error fetching scheduled events: {e}")
-            audit_log(
-                f"Error fetching scheduled events while checking thread existence: {e}"
-            )
         return False
 
     async def check_server_events(self, guild, interaction, new_entries):
