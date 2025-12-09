@@ -299,11 +299,13 @@ class Scrape(commands.Cog):
 
     async def thread_exists(self, channel, thread_title, location):
         """Check if a thread exists with the given title and if its starter message contains the location."""
+
         norm_title = normalize_string(thread_title)
         norm_location = normalize_string(location or "")
         logging.debug(
             f"Checking existence for thread with normalized title '{norm_title}' and location '{norm_location}'"
         )
+
         try:
             threads = channel.threads
             logging.debug(
@@ -312,12 +314,15 @@ class Scrape(commands.Cog):
         except Exception as e:
             logging.error(f"Error accessing channel threads: {e}")
             threads = []
+
+        thread_match_found = False
         for thread in threads:
             thread_norm = normalize_string(thread.name)
             logging.debug(
                 f"Comparing with thread: original name='{thread.name}', normalized='{thread_norm}'"
             )
             if thread_norm == norm_title:
+                thread_match_found = True
                 try:
                     starter_message = await thread.fetch_message(thread.id)
                     message_norm = normalize_string(starter_message.content)
@@ -332,14 +337,23 @@ class Scrape(commands.Cog):
                             f"Thread '{thread.name}' exists with matching location '{location}'."
                         )
                         return True
+                    logging.debug(
+                        f"Thread name matched but location '{norm_location}' was not found in the starter message."
+                    )
                 except Exception as e:
                     logging.error(
                         f"Error fetching starter message for thread '{thread.name}': {e}"
                     )
                     audit_log(
-                        f"Assuming thread '{thread.name}' exists due to error fetching its message."
+                        f"Could not confirm contents of thread '{thread.name}' when checking existence."
                     )
-                    return True
+
+        if thread_match_found:
+            logging.debug(
+                "Completed thread checks without a confirmed location match; skipping event fallback."
+            )
+            return False
+
         # Fallback: check scheduled events for matching thread title
         try:
             scheduled_events = await channel.guild.fetch_scheduled_events()
