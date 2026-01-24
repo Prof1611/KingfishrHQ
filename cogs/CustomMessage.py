@@ -45,111 +45,17 @@ def first_image_attachment(
     return None
 
 
-# --- Dropdown (Select) and View to choose message format ---
-class MessageFormatSelect(discord.ui.Select):
-    def __init__(self):
-        options = [
-            discord.SelectOption(
-                label="Normal",
-                value="normal",
-                description="Send as a normal text message.",
-            ),
-            discord.SelectOption(
-                label="Embed",
-                value="embed",
-                description="Send as an embed message with colour options.",
-            ),
-        ]
-        super().__init__(
-            placeholder="Choose message format...",
-            min_values=1,
-            max_values=1,
-            options=options,
-        )
-
-    async def callback(self, interaction: discord.Interaction):
-        # Store the selected format in the view and continue the flow.
-        self.view.selected_format = self.values[0]
-
-        # Normal message path: open the standard modal to collect the message.
-        if self.view.selected_format == "normal":
-            await interaction.response.send_modal(
-                MessageModal(
-                    interaction.client,
-                    self.view.target_channel,
-                    self.view.selected_format,
-                    self.view.attachments,
-                )
-            )
-            audit_log(
-                f"{interaction.user.name} (ID: {interaction.user.id}) selected 'normal' for channel #{self.view.target_channel.name} (ID: {self.view.target_channel.id})."
-            )
-            return
-
-        # Embed path: first let the user choose an embed colour, then collect title and description.
-        try:
-            # Permissions check for embeds before proceeding
-            perms = self.view.target_channel.permissions_for(interaction.guild.me)
-            if not (perms.send_messages and perms.embed_links):
-                error = make_embed(
-                    "Error",
-                    f"I need send_messages and embed_links in {self.view.target_channel.mention}.",
-                    discord.Color.red(),
-                )
-                await interaction.response.send_message(embed=error, ephemeral=True)
-                audit_log(
-                    f"{interaction.user.name} (ID: {interaction.user.id}) attempted embed in #{self.view.target_channel.name} without sufficient permissions."
-                )
-                return
-
-            colour_view = ColourPickView(
-                self.view.target_channel, self.view.attachments
-            )
-            await interaction.response.send_message(
-                "Choose a colour for your embed:", view=colour_view, ephemeral=True
-            )
-            audit_log(
-                f"{interaction.user.name} (ID: {interaction.user.id}) selected 'embed' for channel #{self.view.target_channel.name} (ID: {self.view.target_channel.id})."
-            )
-        except Exception as e:
-            logging.warning(f"MessageFormatSelect callback error: {e}")
-            audit_log(f"Error processing message format selection: {e}")
-            error = make_embed(
-                "Error", f"Unexpected error:\n`{e}`", discord.Color.red()
-            )
-            # Try to respond, or fall back to followup if already responded
-            if not interaction.response.is_done():
-                await interaction.response.send_message(embed=error, ephemeral=True)
-            else:
-                await interaction.followup.send(embed=error, ephemeral=True)
-
-
-class MessageFormatView(discord.ui.View):
-    def __init__(
-        self,
-        target_channel: discord.TextChannel,
-        attachments: Sequence[discord.Attachment],
-    ):
-        super().__init__()
-        self.target_channel = target_channel
-        self.attachments = list(attachments)
-        self.selected_format = "normal"
-        self.add_item(MessageFormatSelect())
-
-
 # --- Modal for normal message input ---
 class MessageModal(discord.ui.Modal, title="Send a Custom Message"):
     def __init__(
         self,
         bot: commands.Bot,
         target_channel: discord.TextChannel,
-        selected_format: str,
         attachments: Sequence[discord.Attachment],
     ):
         super().__init__()
         self.bot = bot
         self.target_channel = target_channel
-        self.selected_format = selected_format
         self.attachments = list(attachments)
 
         # For normal messages, only add the message input.
@@ -647,7 +553,7 @@ class Message(commands.Cog):
 
     @app_commands.command(
         name="message",
-        description="Sends a custom message in a specified channel. Choose normal text or a coloured embed.",
+        description="Sends a custom text message in a specified channel.",
     )
     @app_commands.describe(
         channel="The channel in which to send the custom message.",
@@ -681,9 +587,12 @@ class Message(commands.Cog):
                 )
                 return
 
-            view = MessageFormatView(channel, attachments)
-            await interaction.response.send_message(
-                "Choose the message format:", view=view, ephemeral=True
+            await interaction.response.send_modal(
+                MessageModal(
+                    interaction.client,
+                    channel,
+                    attachments,
+                )
             )
             audit_log(
                 f"{interaction.user.name} (ID: {interaction.user.id}) invoked message command for channel #{channel.name} (ID: {channel.id})."
