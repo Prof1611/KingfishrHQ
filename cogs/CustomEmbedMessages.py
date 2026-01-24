@@ -1,6 +1,8 @@
 import re
+import asyncio
 import discord
 import logging
+from typing import List, Optional, Sequence
 from discord import app_commands
 from discord.ext import commands
 from datetime import datetime
@@ -19,6 +21,28 @@ def audit_log(message: str):
 def make_embed(title: str, description: str, color: discord.Color) -> discord.Embed:
     return discord.Embed(title=title, description=description, color=color)
 
+
+def collect_attachments(
+    attachments: Sequence[Optional[discord.Attachment]],
+) -> List[discord.Attachment]:
+    return [attachment for attachment in attachments if attachment is not None]
+
+
+async def attachments_to_files(
+    attachments: Sequence[discord.Attachment],
+) -> List[discord.File]:
+    if not attachments:
+        return []
+    return list(await asyncio.gather(*(attachment.to_file() for attachment in attachments)))
+
+
+def first_image_attachment(
+    attachments: Sequence[discord.Attachment],
+) -> Optional[discord.Attachment]:
+    for attachment in attachments:
+        if attachment.content_type and attachment.content_type.startswith("image/"):
+            return attachment
+    return None
 
 # — Dropdown (Select) to choose embed colour first (24 options + custom) —
 class ColourSelect(discord.ui.Select):
@@ -129,14 +153,18 @@ class ColourSelect(discord.ui.Select):
         try:
             if choice == "custom_hex":
                 await interaction.response.send_modal(
-                    HexContentModal(self.parent_view.channel)
+                    HexContentModal(
+                        self.parent_view.channel, self.parent_view.attachments
+                    )
                 )
             else:
                 colour_method = getattr(discord.Color, choice)
                 self.parent_view.chosen_colour = colour_method()
                 await interaction.response.send_modal(
                     ContentModal(
-                        self.parent_view.channel, self.parent_view.chosen_colour
+                        self.parent_view.channel,
+                        self.parent_view.chosen_colour,
+                        self.parent_view.attachments,
                     )
                 )
             audit_log(
@@ -148,15 +176,24 @@ class ColourSelect(discord.ui.Select):
             # fallback to default colour
             self.parent_view.chosen_colour = discord.Color.default()
             await interaction.response.send_modal(
-                ContentModal(self.parent_view.channel, discord.Color.default())
+                ContentModal(
+                    self.parent_view.channel,
+                    discord.Color.default(),
+                    self.parent_view.attachments,
+                )
             )
 
 
 # — View that holds the ColourSelect dropdown —
 class ColourPickView(discord.ui.View):
-    def __init__(self, channel: discord.TextChannel):
+    def __init__(
+        self,
+        channel: discord.TextChannel,
+        attachments: Sequence[discord.Attachment],
+    ):
         super().__init__(timeout=60)
         self.channel = channel
+        self.attachments = list(attachments)
         self.chosen_colour = discord.Color.default()
         self.add_item(ColourSelect(self))
 
@@ -182,10 +219,16 @@ class ContentModal(discord.ui.Modal, title="Write your embed"):
         placeholder="Your message…",
     )
 
-    def __init__(self, channel: discord.TextChannel, colour: discord.Color):
+    def __init__(
+        self,
+        channel: discord.TextChannel,
+        colour: discord.Color,
+        attachments: Sequence[discord.Attachment],
+    ):
         super().__init__()
         self.channel = channel
         self.colour = colour
+        self.attachments = list(attachments)
 
     async def on_submit(self, interaction: discord.Interaction):
         embed = discord.Embed(
@@ -194,7 +237,11 @@ class ContentModal(discord.ui.Modal, title="Write your embed"):
             color=self.colour,
         )
         try:
-            await self.channel.send(embed=embed)
+            files = await attachments_to_files(self.attachments)
+            image_attachment = first_image_attachment(self.attachments)
+            if image_attachment:
+                embed.set_image(url=f"attachment://{image_attachment.filename}")
+            await self.channel.send(embed=embed, files=files or None)
             audit_log(
                 f"{interaction.user} sent embed '{self.embed_title.value}' in #{self.channel.name} with colour {self.colour}."
             )
@@ -244,9 +291,12 @@ class HexContentModal(discord.ui.Modal, title="Custom HEX Embed"):
         placeholder="Your message…",
     )
 
-    def __init__(self, channel: discord.TextChannel):
+    def __init__(
+        self, channel: discord.TextChannel, attachments: Sequence[discord.Attachment]
+    ):
         super().__init__()
         self.channel = channel
+        self.attachments = list(attachments)
 
     async def on_submit(self, interaction: discord.Interaction):
         hex_str = self.hex_code.value.strip().lstrip("#")
@@ -268,7 +318,11 @@ class HexContentModal(discord.ui.Modal, title="Custom HEX Embed"):
             color=colour,
         )
         try:
-            await self.channel.send(embed=embed)
+            files = await attachments_to_files(self.attachments)
+            image_attachment = first_image_attachment(self.attachments)
+            if image_attachment:
+                embed.set_image(url=f"attachment://{image_attachment.filename}")
+            await self.channel.send(embed=embed, files=files or None)
             audit_log(
                 f"{interaction.user} sent custom embed '{self.embed_title.value}' in #{self.channel.name}."
             )
@@ -311,11 +365,24 @@ class CustomEmbed(commands.Cog):
         name="sendembed",
         description="Send a custom embed: choose a dropdown colour (or custom hex).",
     )
-    @app_commands.describe(channel="Channel to post the embed in")
+    @app_commands.describe(
+        channel="Channel to post the embed in",
+        attachment1="Optional image or attachment to include.",
+        attachment2="Optional image or attachment to include.",
+        attachment3="Optional image or attachment to include.",
+    )
     async def sendembed(
-        self, interaction: discord.Interaction, channel: discord.TextChannel
+        self,
+        interaction: discord.Interaction,
+        channel: discord.TextChannel,
+        attachment1: Optional[discord.Attachment] = None,
+        attachment2: Optional[discord.Attachment] = None,
+        attachment3: Optional[discord.Attachment] = None,
     ):
         try:
+            attachments = collect_attachments(
+                (attachment1, attachment2, attachment3)
+            )
             perms = channel.permissions_for(interaction.guild.me)
             if not (perms.send_messages and perms.embed_links):
                 error = make_embed(
@@ -329,7 +396,7 @@ class CustomEmbed(commands.Cog):
                 )
                 return
 
-            view = ColourPickView(channel)
+            view = ColourPickView(channel, attachments)
             # *** Send prompt as an embed ***
             await interaction.response.send_message(
                 embed=discord.Embed(description="Choose a colour for your embed:"),
