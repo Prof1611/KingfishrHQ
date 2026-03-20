@@ -185,6 +185,33 @@ class MessageModal(discord.ui.Modal, title="Send a Custom Message"):
             audit_log(
                 f"{interaction.user.name} (ID: {interaction.user.id}) failed to send custom message: Discord API error in channel #{self.target_channel.name} (ID: {self.target_channel.id})."
             )
+        elif e.status == 413 or getattr(e, "code", None) == 40005:
+            logging.error(
+                "Custom message payload too large in #%s. "
+                "chars=%s, attachments=%s, attachment_bytes=%s. Error: %s",
+                self.target_channel.name,
+                len(self.message_input.value or ""),
+                len(self.attachments or []),
+                sum(a.size for a in (self.attachments or []) if hasattr(a, "size")),
+                e,
+            )
+            error_embed = discord.Embed(
+                title="Message Too Large",
+                description=(
+                    f"Discord rejected this message for {self.target_channel.mention} because the payload is too large.\n\n"
+                    "Try one or more of the following:\n"
+                    "• Shorten the text (Discord allows up to 2000 characters per message).\n"
+                    "• Remove or shrink attachments.\n"
+                    "• Split this into multiple messages."
+                ),
+                color=discord.Color.red(),
+            )
+            await interaction.followup.edit_message(
+                message_id=original_response.id, content="", embed=error_embed
+            )
+            audit_log(
+                f"{interaction.user.name} (ID: {interaction.user.id}) failed to send custom message: payload too large in channel #{self.target_channel.name} (ID: {self.target_channel.id})."
+            )
         else:  # Other errors
             logging.error(
                 f"Error when attempting to send custom message in #{self.target_channel.name}. Error: {e}"
